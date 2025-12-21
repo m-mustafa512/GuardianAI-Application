@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Outer blue circle -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M 60,5 A 55,55 0 1,1 60,115 A 55,55 0 1,1 60,5 Z"/>
+    <!-- Lock body -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M60,20 L40,30 L40,50c0,5.5 4.5,10 10,10h20c5.5,0 10,-4.5 10,-10V30L60,20z"/>
+    <!-- Inner circle with check -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M 60,60 A 15,15 0 1,1 60,90 A 15,15 0 1,1 60,60 Z"/>
+    <!-- Checkmark -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,75 L52,72 L55,69 L58,72z"/>
+</vector>

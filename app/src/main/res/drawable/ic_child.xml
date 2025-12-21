@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="56dp"
+    android:height="56dp"
+    android:viewportWidth="56"
+    android:viewportHeight="56">
+    <!-- Head circle -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M 28,10 A 10,10 0 1,1 28,30 A 10,10 0 1,1 28,10 Z"/>
+    <!-- Smile -->
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M18,35 Q28,30 38,35"/>
+    <path
+        android:fillColor="#4A90E2"
+        android:pathData="M20,45 Q28,40 36,45"/>
+</vector>
