@@ -76,6 +76,10 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".ui.auth.ChildLoginInfoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".ui.auth.QRScanActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

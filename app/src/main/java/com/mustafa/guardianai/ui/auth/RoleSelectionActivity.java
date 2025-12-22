@@ -27,9 +27,9 @@ public class RoleSelectionActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
         });
 
-        // Child card - navigate to login (children can login or scan QR)
+        // Child card - navigate to info page explaining QR scan process
         binding.cardChild.setOnClickListener(v -> {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, ChildLoginInfoActivity.class));
         });
     }
 }

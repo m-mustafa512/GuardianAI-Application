@@ -52,6 +52,7 @@ public class QRPairingService {
 
     /**
      * Validate and process QR pairing data from child device
+     * Automatically creates child account using anonymous authentication
      * @param qrData QR pairing data scanned by child
      * @param callback Callback for result
      */
@@ -84,60 +85,78 @@ public class QRPairingService {
                         return;
                     }
 
+                    // Check if user is already logged in (sign out first if needed)
                     FirebaseUser currentUser = auth.getCurrentUser();
-                    if (currentUser == null) {
-                        callback.onFailure(new Exception("No user logged in"));
-                        return;
+                    if (currentUser != null) {
+                        // Sign out any existing user (child should not have email/password login)
+                        auth.signOut();
                     }
 
-                    // Get device ID
-                    Context context = auth.getApp().getApplicationContext();
-                    String childDeviceId = Settings.Secure.getString(
-                            context.getContentResolver(),
-                            Settings.Secure.ANDROID_ID
-                    );
+                    // Create anonymous child account automatically
+                    auth.signInAnonymously()
+                            .addOnSuccessListener(authResult -> {
+                                FirebaseUser childUser = authResult.getUser();
+                                if (childUser == null) {
+                                    callback.onFailure(new Exception("Failed to create child account"));
+                                    return;
+                                }
 
-                    // Create child user document in Firestore
-                    User childUser = new User(
-                            currentUser.getUid(),
-                            currentUser.getEmail() != null ? currentUser.getEmail() : "",
-                            currentUser.getDisplayName(),
-                            UserRole.CHILD,
-                            qrData.getParentUid(),
-                            childDeviceId,
-                            currentUser.isEmailVerified()
-                    );
+                                // Get device ID
+                                Context context = auth.getApp().getApplicationContext();
+                                String childDeviceId = Settings.Secure.getString(
+                                        context.getContentResolver(),
+                                        Settings.Secure.ANDROID_ID
+                                );
+                                // Make it effectively final for lambda
+                                final String finalChildDeviceId = (childDeviceId == null || childDeviceId.isEmpty()) 
+                                        ? UUID.randomUUID().toString() 
+                                        : childDeviceId;
 
-                    firestore.collection("users")
-                            .document(currentUser.getUid())
-                            .set(childUser)
-                            .addOnSuccessListener(aVoid -> {
-                                // Create device pair document
-                                String pairId = UUID.randomUUID().toString();
-                                Map<String, Object> pairData = new HashMap<>();
-                                pairData.put("pairId", pairId);
-                                pairData.put("parentUid", qrData.getParentUid());
-                                pairData.put("childUid", currentUser.getUid());
-                                pairData.put("parentDeviceId", storedData.getParentUid());
-                                pairData.put("childDeviceId", childDeviceId);
-                                pairData.put("pairedAt", System.currentTimeMillis());
-                                pairData.put("isActive", true);
+                                // Create child user document in Firestore
+                                User childUserData = new User(
+                                        childUser.getUid(),
+                                        "", // Child accounts don't have email
+                                        "Child Device", // Default display name
+                                        UserRole.CHILD,
+                                        qrData.getParentUid(),
+                                        finalChildDeviceId,
+                                        false // Child accounts don't need email verification
+                                );
 
-                                firestore.collection("device_pairs")
-                                        .document(pairId)
-                                        .set(pairData)
-                                        .addOnSuccessListener(aVoid1 -> {
-                                            // Delete used pairing token
-                                            firestore.collection("pairing_tokens")
-                                                    .document(qrData.getPairToken())
-                                                    .delete()
-                                                    .addOnSuccessListener(aVoid2 -> 
-                                                            callback.onSuccess())
+                                firestore.collection("users")
+                                        .document(childUser.getUid())
+                                        .set(childUserData)
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Create device pair document
+                                            String pairId = UUID.randomUUID().toString();
+                                            Map<String, Object> pairData = new HashMap<>();
+                                            pairData.put("pairId", pairId);
+                                            pairData.put("parentUid", qrData.getParentUid());
+                                            pairData.put("childUid", childUser.getUid());
+                                            pairData.put("parentDeviceId", storedData.getParentUid());
+                                            pairData.put("childDeviceId", finalChildDeviceId);
+                                            pairData.put("pairedAt", System.currentTimeMillis());
+                                            pairData.put("isActive", true);
+
+                                            firestore.collection("device_pairs")
+                                                    .document(pairId)
+                                                    .set(pairData)
+                                                    .addOnSuccessListener(aVoid1 -> {
+                                                        // Delete used pairing token
+                                                        firestore.collection("pairing_tokens")
+                                                                .document(qrData.getPairToken())
+                                                                .delete()
+                                                                .addOnSuccessListener(aVoid2 -> 
+                                                                        callback.onSuccess())
+                                                                .addOnFailureListener(callback::onFailure);
+                                                    })
                                                     .addOnFailureListener(callback::onFailure);
                                         })
                                         .addOnFailureListener(callback::onFailure);
                             })
-                            .addOnFailureListener(callback::onFailure);
+                            .addOnFailureListener(e -> {
+                                callback.onFailure(new Exception("Failed to create child account: " + e.getMessage()));
+                            });
                 })
                 .addOnFailureListener(callback::onFailure);
     }

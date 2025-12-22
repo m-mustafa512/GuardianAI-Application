@@ -21,7 +21,6 @@ import com.mustafa.guardianai.utils.PasswordValidator;
 public class SignUpActivity extends AppCompatActivity {
     private ActivitySignupBinding binding;
     private final AuthService authService = new AuthService();
-    private UserRole selectedRole = UserRole.PARENT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
         // Back button
         binding.btnBack.setOnClickListener(v -> finish());
 
-        // Role toggle
-        binding.btnParent.setOnClickListener(v -> {
-            selectedRole = UserRole.PARENT;
-            updateRoleToggle();
-        });
-
-        binding.btnChild.setOnClickListener(v -> {
-            selectedRole = UserRole.CHILD;
-            updateRoleToggle();
-        });
-
-        // Create Account button
+        // Create Account button (only for parent accounts)
         binding.btnCreateAccount.setOnClickListener(v -> handleSignUp());
 
         // Login link
@@ -55,22 +43,6 @@ public class SignUpActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         });
-    }
-
-    private void updateRoleToggle() {
-        if (selectedRole == UserRole.PARENT) {
-            binding.btnParent.setTextColor(getResources().getColor(android.R.color.white, null));
-            binding.btnParent.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, com.mustafa.guardianai.R.color.primary));
-            binding.btnChild.setTextColor(getResources().getColor(android.R.color.darker_gray, null));
-            binding.btnChild.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, android.R.color.transparent));
-            binding.tvInfo.setText("Parent accounts can manage child devices and settings.");
-        } else {
-            binding.btnChild.setTextColor(getResources().getColor(android.R.color.white, null));
-            binding.btnChild.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, com.mustafa.guardianai.R.color.primary));
-            binding.btnParent.setTextColor(getResources().getColor(android.R.color.darker_gray, null));
-            binding.btnParent.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, android.R.color.transparent));
-            binding.tvInfo.setText("Child accounts will be paired with a parent device.");
-        }
     }
 
     private void handleSignUp() {
@@ -109,36 +81,30 @@ public class SignUpActivity extends AppCompatActivity {
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.btnCreateAccount.setEnabled(false);
 
-        if (selectedRole == UserRole.PARENT) {
-            authService.registerParent(email, password, displayName, new AuthService.AuthCallback() {
-                @Override
-                public void onSuccess(String uid) {
-                    // Ensure we're on UI thread
-                    if (Looper.myLooper() == Looper.getMainLooper()) {
-                        navigateToSuccess();
-                    } else {
-                        runOnUiThread(() -> navigateToSuccess());
-                    }
+        // Sign up is only for parent accounts
+        authService.registerParent(email, password, displayName, new AuthService.AuthCallback() {
+            @Override
+            public void onSuccess(String uid) {
+                // Ensure we're on UI thread
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    navigateToSuccess();
+                } else {
+                    runOnUiThread(() -> navigateToSuccess());
                 }
+            }
 
-                @Override
-                public void onFailure(Exception exception) {
-                    runOnUiThread(() -> {
-                        binding.progressBar.setVisibility(View.GONE);
-                        binding.btnCreateAccount.setEnabled(true);
-                        Log.e("SignUpActivity", "Sign up failed: " + exception.getMessage(), exception);
-                        Toast.makeText(SignUpActivity.this,
-                                "Sign up failed: " + exception.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    });
-                }
-            });
-        } else {
-            // For child, they need to be paired via QR code after signup
-            Toast.makeText(this, "Child accounts must be paired via QR code after signup", Toast.LENGTH_LONG).show();
-            binding.progressBar.setVisibility(View.GONE);
-            binding.btnCreateAccount.setEnabled(true);
-        }
+            @Override
+            public void onFailure(Exception exception) {
+                runOnUiThread(() -> {
+                    binding.progressBar.setVisibility(View.GONE);
+                    binding.btnCreateAccount.setEnabled(true);
+                    Log.e("SignUpActivity", "Sign up failed: " + exception.getMessage(), exception);
+                    Toast.makeText(SignUpActivity.this,
+                            "Sign up failed: " + exception.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
     private void navigateToSuccess() {

@@ -48,51 +48,6 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="8dp" />
 
-        <!-- Role Toggle -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardRoleToggle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0"
-            app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="4dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnParent"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Parent"
-                    android:textColor="@android:color/white"
-                    android:backgroundTint="#4A90E2"
-                    app:cornerRadius="8dp"
-                    android:padding="12dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnChild"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Child"
-                    android:textColor="#666666"
-                    android:backgroundTint="@android:color/transparent"
-                    app:cornerRadius="8dp"
-                    android:padding="12dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
         <!-- Info Message -->
         <LinearLayout
             android:id="@+id/layoutInfo"
@@ -102,8 +57,8 @@
             android:gravity="center_vertical"
             android:padding="12dp"
             android:background="#E3F2FD"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/cardRoleToggle">
+            android:layout_marginTop="32dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
 
             <ImageView
                 android:layout_width="20dp"
@@ -118,7 +73,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Parent accounts can manage child devices and settings."
+                android:text="Create a parent account to manage child devices and settings."
                 android:textSize="12sp"
                 android:textColor="#4A90E2" />
         </LinearLayout>

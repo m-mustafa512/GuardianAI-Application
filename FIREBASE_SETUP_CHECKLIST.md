@@ -16,6 +16,9 @@ This error means **Firebase Authentication is NOT enabled** in your Firebase Con
 6. Click on **Email/Password**
 7. **Enable** the first toggle (Email/Password)
 8. Click **Save**
+9. Click on **Anonymous** (Required for child account creation via QR code)
+10. **Enable** the toggle
+11. Click **Save**
 
 ### Step 2: Create Firestore Database (if not created)
 

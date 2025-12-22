@@ -81,28 +81,8 @@ public class LoginActivity extends AppCompatActivity {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.btnLogin.setEnabled(true);
 
-                    // Check email verification for parent
-                    if (role == UserRole.PARENT) {
-                        authService.reloadUser(new AuthService.SimpleCallback() {
-                            @Override
-                            public void onSuccess() {
-                                if (!authService.isEmailVerified()) {
-                                    // Navigate to email verification screen
-                                    startActivity(new Intent(LoginActivity.this, EmailVerificationActivity.class));
-                                    finish();
-                                    return;
-                                }
-                                navigateToDashboard(role);
-                            }
-
-                            @Override
-                            public void onFailure(Exception exception) {
-                                navigateToDashboard(role);
-                            }
-                        });
-                    } else {
-                        navigateToDashboard(role);
-                    }
+                    // Navigate directly to dashboard (email verification is done via link)
+                    navigateToDashboard(role);
                 });
             }
 
