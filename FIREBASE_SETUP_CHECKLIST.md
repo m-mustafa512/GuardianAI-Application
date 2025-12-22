@@ -37,17 +37,25 @@ After creating the database, you need to set up security rules to allow read/wri
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read/write pairing tokens
+    // Allow anyone to READ pairing tokens (for QR validation)
+    // But only authenticated users can WRITE (create) them
     match /pairing_tokens/{tokenId} {
-      allow read, write: if request.auth != null;
+      allow read: if true;  // Allow unauthenticated reads for QR validation
+      allow write: if request.auth != null;  // Only authenticated users can create tokens
+      allow delete: if request.auth != null;  // Only authenticated users can delete tokens
     }
     // Allow users to read/write their own user data
+    // Also allow anonymous users to create their own user document
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;  // Prevent deletion for safety
     }
-    // Allow users to read/write device pairs
+    // Allow authenticated users to read/write device pairs
     match /device_pairs/{pairId} {
-      allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
     }
   }
 }
