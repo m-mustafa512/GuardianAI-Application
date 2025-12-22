@@ -2,6 +2,7 @@ package com.mustafa.guardianai.ui.parent;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mustafa.guardianai.databinding.ActivityParentDashboardBinding;
@@ -108,36 +109,66 @@ public class ParentDashboardActivity extends AppCompatActivity {
                             binding.progressBar.setVisibility(android.view.View.GONE);
                             binding.btnGenerateQR.setEnabled(true);
                             
-                            // Generate QR code bitmap
-                            String qrJson = qrData.toJson();
-                            android.graphics.Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrJson, 400, 400);
-                            
-                            if (qrBitmap != null) {
-                                // Display QR code image
-                                binding.ivQRCode.setImageBitmap(qrBitmap);
-                                binding.ivQRCode.setVisibility(android.view.View.VISIBLE);
-                                binding.tvQRCodeText.setVisibility(android.view.View.GONE);
-                            } else {
-                                // Fallback: show JSON text if bitmap generation fails
-                                binding.ivQRCode.setVisibility(android.view.View.GONE);
-                                binding.tvQRCodeText.setText("QR Code Data:\n" + qrJson);
-                                binding.tvQRCodeText.setVisibility(android.view.View.VISIBLE);
+                            try {
+                                // Generate QR code bitmap
+                                String qrJson = qrData.toJson();
+                                Log.d("ParentDashboard", "QR Data JSON: " + qrJson);
+                                
+                                android.graphics.Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrJson, 400, 400);
+                                
+                                if (qrBitmap != null) {
+                                    Log.d("ParentDashboard", "QR Bitmap generated successfully");
+                                    // Display QR code image
+                                    binding.ivQRCode.setImageBitmap(qrBitmap);
+                                    binding.ivQRCode.setVisibility(android.view.View.VISIBLE);
+                                    binding.tvQRCodeText.setVisibility(android.view.View.GONE);
+                                    
+                                    Toast.makeText(ParentDashboardActivity.this,
+                                            "QR code generated. Show this to child device to scan.",
+                                            Toast.LENGTH_LONG).show();
+                                } else {
+                                    Log.e("ParentDashboard", "QR Bitmap generation returned null");
+                                    // Fallback: show JSON text if bitmap generation fails
+                                    binding.ivQRCode.setVisibility(android.view.View.GONE);
+                                    binding.tvQRCodeText.setText("QR Code Data:\n" + qrJson);
+                                    binding.tvQRCodeText.setVisibility(android.view.View.VISIBLE);
+                                    
+                                    Toast.makeText(ParentDashboardActivity.this,
+                                            "QR code generated (text mode). Show this to child device.",
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            } catch (Exception e) {
+                                Log.e("ParentDashboard", "Error generating QR code: " + e.getMessage(), e);
+                                binding.progressBar.setVisibility(android.view.View.GONE);
+                                binding.btnGenerateQR.setEnabled(true);
+                                Toast.makeText(ParentDashboardActivity.this,
+                                        "Error generating QR code: " + e.getMessage(),
+                                        Toast.LENGTH_LONG).show();
                             }
-                            
-                            Toast.makeText(ParentDashboardActivity.this,
-                                    "QR code generated. Show this to child device to scan.",
-                                    Toast.LENGTH_LONG).show();
                         });
                     }
 
                     @Override
                     public void onFailure(Exception exception) {
+                        Log.e("ParentDashboard", "Failed to generate QR pairing token: " + exception.getMessage(), exception);
                         runOnUiThread(() -> {
                             binding.progressBar.setVisibility(android.view.View.GONE);
                             binding.btnGenerateQR.setEnabled(true);
-                            Toast.makeText(ParentDashboardActivity.this,
-                                    "Failed to generate QR: " + exception.getMessage(),
-                                    Toast.LENGTH_LONG).show();
+                            
+                            String errorMsg = exception.getMessage();
+                            if (errorMsg != null && errorMsg.contains("PERMISSION_DENIED")) {
+                                Toast.makeText(ParentDashboardActivity.this,
+                                        "Firestore permission denied. Please check Firestore security rules.",
+                                        Toast.LENGTH_LONG).show();
+                            } else if (errorMsg != null && errorMsg.contains("UNAVAILABLE")) {
+                                Toast.makeText(ParentDashboardActivity.this,
+                                        "Firestore is not available. Please check your internet connection and Firebase setup.",
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(ParentDashboardActivity.this,
+                                        "Failed to generate QR: " + (errorMsg != null ? errorMsg : "Unknown error"),
+                                        Toast.LENGTH_LONG).show();
+                            }
                         });
                     }
                 }
