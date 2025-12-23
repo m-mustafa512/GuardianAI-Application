@@ -6,19 +6,28 @@ This error means **Firebase Authentication is NOT enabled** in your Firebase Con
 
 ## 🔧 IMMEDIATE FIX REQUIRED:
 
-### Step 1: Enable Email/Password Authentication
+### Step 1: Enable Authentication Methods
+
+**⚠️ CRITICAL: Both methods are required for the app to work!**
 
 1. Go to Firebase Console: https://console.firebase.google.com/
 2. Select your project: **guardian-ai-edfa6**
 3. Click on **Authentication** in the left menu
 4. If you see "Get started", click it
 5. Click on the **Sign-in method** tab
+
+#### Enable Email/Password (for Parent Login):
 6. Click on **Email/Password**
 7. **Enable** the first toggle (Email/Password)
 8. Click **Save**
-9. Click on **Anonymous** (Required for child account creation via QR code)
+
+#### Enable Anonymous Authentication (for Child QR Pairing):
+**⚠️ THIS IS REQUIRED FOR CHILD DEVICE PAIRING!**
+9. Click on **Anonymous** in the list of sign-in providers
 10. **Enable** the toggle
 11. Click **Save**
+
+**Why Anonymous Auth?** Child devices don't have email/password. They use anonymous authentication when scanning the QR code to automatically create their account.
 
 ### Step 2: Create Firestore Database (if not created)
 
