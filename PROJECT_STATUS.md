@@ -1,59 +1,131 @@
 # Guardian AI - Project Status
 
-## ✅ Completed Setup
+## 📱 Project Overview
 
-### Project Structure
-- ✅ Two separate Android modules created:
-  - `child-app` - Child device application
-  - `parent-app` - Parent device application
+**Guardian AI** is a parental control and privacy protection mobile application for Android. It's a single Android application with role-based logins (Parent and Child) that enables parents to monitor and control child device usage.
+
+## ✅ Completed Modules
+
+### 1. Project Structure & Setup
+- ✅ Single Android app module (`:app`) with role-based authentication
+- ✅ Java-based implementation (not Kotlin)
 - ✅ Package structure organized:
-  - `data/` - Models, repositories, local database
-  - `ui/` - Activities, fragments, viewmodels
-  - `network/` - Firebase integration
-  - `services/` - Background services (child-app)
-  - `ai/` - TensorFlow Lite integration (child-app)
-  - `utils/` - Utility classes
+  - `data/model/` - Data models (User, UserRole, QRPairingData)
+  - `ui/auth/` - Authentication activities
+  - `ui/parent/` - Parent dashboard
+  - `ui/child/` - Child dashboard
+  - `network/` - Firebase integration services
+  - `utils/` - Utility classes (validators, QR generator)
+- ✅ Application class (`GuardianAIApplication`) for Firebase initialization
 
-### Dependencies
+### 2. Dependencies & Build Configuration
 - ✅ Firebase BOM configured
-  - Firebase Authentication
+  - Firebase Authentication (Email/Password + Anonymous)
   - Firebase Firestore
-  - Firebase Cloud Messaging
-  - Firebase Analytics
-- ✅ Room Database configured
-- ✅ TensorFlow Lite configured (child-app)
 - ✅ Lifecycle components (ViewModel, LiveData)
-- ✅ Navigation component
-- ✅ Coroutines support
-- ✅ Material Design 3
+- ✅ Material Design Components
+- ✅ Biometric Authentication (AndroidX Biometric)
+- ✅ ZXing library for QR code generation and scanning
+- ✅ View Binding enabled
+- ✅ Gradle configuration optimized
 
-### Code Foundation
-- ✅ Data models created:
-  - User, DevicePair, Alert, SafetyRule, UsageData
-- ✅ Firebase service classes created
-- ✅ Basic MainActivity for both apps
-- ✅ AndroidManifest files configured with permissions
+### 3. Login Module (COMPLETED ✅)
 
-### Documentation
-- ✅ README.md with project overview
-- ✅ FIREBASE_SETUP.md with setup instructions
-- ✅ .gitignore configured
+#### Authentication Features:
+- ✅ **Parent Sign-up & Login**
+  - Email/Password registration
+  - Email verification via link
+  - Strong password validation (regex checks)
+  - Email format validation
+  - Sign-up success screen
+  - Login with email verification check
+
+- ✅ **Security & Validation**
+  - Email validator with regex
+  - Password strength validator (min 8 chars, uppercase, lowercase, number, special char)
+  - Input validation and error handling
+  - Firebase authentication integration
+
+- ✅ **QR-Handshake Enrollment**
+  - QR code generation on parent dashboard
+  - QR code scanning on child device
+  - Secure password-less pairing via QR scan
+  - Automatic child account creation (anonymous auth)
+  - Device pairing stored in Firestore
+  - Token expiration (10 minutes)
+  - Child login info screen with instructions
+
+- ✅ **Biometric App Lock**
+  - Biometric authentication support (Fingerprint/FaceID)
+  - Integrated in parent dashboard (ready for implementation)
+
+#### UI Screens Implemented:
+- ✅ Splash Activity
+- ✅ Role Selection Activity (Parent/Child)
+- ✅ Login Activity (Parent)
+- ✅ Sign Up Activity (Parent only)
+- ✅ Sign Up Success Activity
+- ✅ Forgot Password Activity
+- ✅ Forgot Password Success Activity
+- ✅ Email Verification Activity
+- ✅ Login Success Activity
+- ✅ Child Login Info Activity
+- ✅ QR Scan Activity
+- ✅ Parent Dashboard Activity
+- ✅ Child Dashboard Activity
+
+#### Network Services:
+- ✅ `AuthService` - Handles Firebase authentication
+  - Parent registration
+  - Parent login
+  - Password reset
+  - Email verification
+  - Current user management
+
+- ✅ `QRPairingService` - Handles QR code pairing
+  - QR code generation
+  - Pairing token creation
+  - QR code validation
+  - Automatic child account creation
+  - Device pairing management
+
+#### Utilities:
+- ✅ `EmailValidator` - Email format validation
+- ✅ `PasswordValidator` - Password strength validation
+- ✅ `QRCodeGenerator` - QR code bitmap generation
+
+### 4. Firebase Integration
+- ✅ Firebase Authentication configured
+  - Email/Password enabled
+  - Anonymous Authentication enabled (for child accounts)
+- ✅ Firestore Database configured
+  - Security rules set up
+  - Collections: `users`, `pairing_tokens`, `device_pairs`
+- ✅ Application-level Firebase initialization
+- ✅ Error handling for Firebase operations
+
+### 5. Permissions & Manifest
+- ✅ Internet permission
+- ✅ Network state permission
+- ✅ Camera permission (for QR scanning)
+- ✅ All activities registered in AndroidManifest
+- ✅ Application class registered
 
 ## ⏳ Next Steps (To Be Implemented)
 
-### 1. Firebase Integration
-- [ ] Add `google-services.json` files (see FIREBASE_SETUP.md)
-- [ ] Implement authentication (login/register)
-- [ ] Implement device pairing system
-- [ ] Set up Firestore collections structure
+### 1. Parent Dashboard Features
+- [ ] Biometric lock implementation
+- [ ] Child device list/management
+- [ ] View child device status
+- [ ] Generate/regenerate QR codes
+- [ ] Settings screen
 
-### 2. Room Database Setup
-- [ ] Create Room entities for local storage
-- [ ] Create DAOs (Data Access Objects)
-- [ ] Create database class
-- [ ] Implement repositories
+### 2. Child Dashboard Features
+- [ ] Display pairing status
+- [ ] Show parent information
+- [ ] Settings screen
 
-### 3. Child App Features
+### 3. Monitoring & AI Features (Child Device)
 - [ ] Background monitoring service
 - [ ] App usage tracking
 - [ ] Location tracking
@@ -63,20 +135,18 @@
 - [ ] LSTM Autoencoder for anomaly detection
 - [ ] Audio keyword detection
 
-### 4. Parent App Features
-- [ ] Authentication UI
-- [ ] Dashboard UI
-- [ ] Child device list
+### 4. Parent Control Features
+- [ ] Real-time child device monitoring
 - [ ] Alert management
 - [ ] Rule configuration UI
-- [ ] Real-time data visualization
+- [ ] Safety rules enforcement
+- [ ] Data visualization
+- [ ] Remote control commands
 
-### 5. AI Implementation
-- [ ] Train/prepare LSTM Autoencoder model
-- [ ] Convert to TensorFlow Lite format
-- [ ] Implement inference pipeline
-- [ ] Audio keyword detection model
-- [ ] Anomaly detection logic
+### 5. Data Storage
+- [ ] Room Database setup (for local storage on child device)
+- [ ] Local data models
+- [ ] Data synchronization with Firestore
 
 ### 6. Testing
 - [ ] Unit tests
@@ -85,71 +155,86 @@
 
 ## 📝 Important Notes
 
-### Before Running
-1. **Firebase Setup Required**: You MUST add `google-services.json` files before building
-   - See `FIREBASE_SETUP.md` for detailed instructions
-   - Files needed:
-     - `child-app/google-services.json`
-     - `parent-app/google-services.json`
+### Firebase Setup Required
+1. **Authentication Methods:**
+   - Email/Password: ✅ Must be enabled
+   - Anonymous: ✅ Must be enabled (for child QR pairing)
+
+2. **Firestore Database:**
+   - Database must be created
+   - Security rules must be configured (see `FIRESTORE_SECURITY_RULES.md`)
+   - Collections: `users`, `pairing_tokens`, `device_pairs`
+
+3. **Configuration Files:**
+   - `app/google-services.json` must be added (excluded from git)
 
 ### Code Style
-- Child app MainActivity is in Java (can be converted to Kotlin later)
-- Parent app MainActivity is in Kotlin
-- Both languages are supported in the project
-- New code should prefer Kotlin for consistency
+- **Language**: Java (not Kotlin)
+- **Architecture**: MVVM pattern (ready for ViewModels)
+- **UI**: Material Design Components
+- **Binding**: View Binding (not Data Binding)
 
 ### Architecture
 - Following MVVM (Model-View-ViewModel) pattern
-- Repository pattern for data access
+- Repository pattern ready for data access
 - Separation of concerns maintained
 - Suitable for FYP academic review
 
 ### Permissions
-- Child app has extensive permissions for monitoring
-- Parent app has minimal permissions (internet only)
-- All permissions are declared in AndroidManifest
-- Runtime permission requests need to be implemented
+- Camera permission required for QR scanning
+- Runtime permission requests implemented for camera
+- Internet and network state permissions declared
 
-## 🎯 FYP Scope Considerations
+## 🔧 Development Status
 
-### What's Included
-- Complete project structure
-- Foundation code and architecture
-- Data models and service classes
-- Firebase integration setup
-- Documentation
+### Current Phase: Login Module ✅ COMPLETE
+- All authentication flows working
+- QR code pairing functional
+- Email verification implemented
+- Ready to move to next module
 
-### What Needs Implementation
-- UI screens and navigation
-- Business logic implementation
-- AI model training/integration
-- Complete feature implementation
-- Testing
-
-### Academic Focus
-- Code is well-structured and commented
-- Architecture is clear and follows best practices
-- Suitable for academic review and demonstration
-- Can be extended incrementally
+### Next Phase: Dashboard & Monitoring
+- Parent dashboard enhancements
+- Child monitoring service
+- AI integration
 
 ## 📚 Resources
 
 - [Firebase Documentation](https://firebase.google.com/docs)
-- [TensorFlow Lite](https://www.tensorflow.org/lite)
-- [Room Database](https://developer.android.com/training/data-storage/room)
-- [Android Architecture Components](https://developer.android.com/topic/architecture)
+- [Firebase Authentication](https://firebase.google.com/docs/auth)
+- [Firestore Documentation](https://firebase.google.com/docs/firestore)
+- [ZXing Library](https://github.com/journeyapps/zxing-android-embedded)
+- [Android Biometric](https://developer.android.com/training/sign-in/biometric-auth)
+- [Material Design Components](https://material.io/components)
 
-## 🔧 Development Tips
+## 🐛 Known Issues & Solutions
 
-1. **Start with Firebase Setup**: Get authentication working first
-2. **Implement One Feature at a Time**: Don't try to do everything at once
-3. **Test on Real Devices**: Some features (sensors, usage stats) need real devices
-4. **Use Logging**: Add extensive logging for debugging
-5. **Document Your Progress**: Keep notes on what you implement
+### Issue: QR Code Not Showing
+- **Solution**: Ensure Firestore Database is created and security rules are configured
+
+### Issue: Pairing Failed - PERMISSION_DENIED
+- **Solution**: Update Firestore security rules to allow unauthenticated reads of `pairing_tokens`
+
+### Issue: Pairing Failed - Anonymous Auth Restricted
+- **Solution**: Enable Anonymous Authentication in Firebase Console
+
+### Issue: Signup/Login Not Working
+- **Solution**: 
+  1. Enable Email/Password authentication in Firebase Console
+  2. Ensure `google-services.json` is in `app/` directory
+  3. Check Firebase initialization in `GuardianAIApplication`
+
+## 📋 Setup Checklist for New Developers
+
+1. ✅ Clone repository
+2. ⚠️ Add `app/google-services.json` (not in git)
+3. ⚠️ Enable Firebase Authentication (Email/Password + Anonymous)
+4. ⚠️ Create Firestore Database
+5. ⚠️ Configure Firestore Security Rules
+6. ✅ Build and run project
 
 ---
 
-**Last Updated**: Initial setup complete
-**Next Milestone**: Firebase authentication implementation
-
-
+**Last Updated**: Login Module Complete
+**Current Milestone**: ✅ Authentication & QR Pairing Complete
+**Next Milestone**: Parent Dashboard Features & Child Monitoring

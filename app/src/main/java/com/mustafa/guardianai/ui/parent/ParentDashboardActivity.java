@@ -1,25 +1,27 @@
 package com.mustafa.guardianai.ui.parent;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.mustafa.guardianai.R;
 import com.mustafa.guardianai.databinding.ActivityParentDashboardBinding;
 import com.mustafa.guardianai.network.AuthService;
-import com.mustafa.guardianai.network.QRPairingService;
-import com.mustafa.guardianai.ui.auth.LoginActivity;
 import com.mustafa.guardianai.utils.BiometricHelper;
-import com.mustafa.guardianai.utils.QRCodeGenerator;
 
 /**
  * Parent Dashboard Activity
- * Main dashboard for parent users with biometric protection
+ * Main activity with bottom navigation and fragment container
+ * Biometric authentication only triggers when app is reopened from background
  */
 public class ParentDashboardActivity extends AppCompatActivity {
     private ActivityParentDashboardBinding binding;
     private final AuthService authService = new AuthService();
     private BiometricHelper biometricHelper;
+    private boolean isAppInBackground = false;
+    private boolean hasCheckedBiometricOnStart = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,31 +30,64 @@ public class ParentDashboardActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         biometricHelper = new BiometricHelper(this);
-        setupUI();
-        checkBiometricAndAuthenticate();
+        
+        setupBottomNavigation();
+        
+        // Load default fragment (Dashboard)
+        if (savedInstanceState == null) {
+            loadFragment(new DashboardFragment());
+        }
     }
 
-    private void setupUI() {
-        // Get current user info
-        var user = authService.getCurrentUser();
-        binding.tvWelcome.setText("Welcome, " + (user != null && user.getEmail() != null ? user.getEmail() : "Parent"));
-
-        // Logout button
-        binding.btnLogout.setOnClickListener(v -> {
-            authService.logout();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+    private void setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            Fragment fragment = null;
+            
+            if (itemId == R.id.nav_home) {
+                fragment = new DashboardFragment();
+            } else if (itemId == R.id.nav_activity) {
+                // Activity feature coming soon
+                Toast.makeText(this, "Activity feature coming soon", Toast.LENGTH_SHORT).show();
+                return false;
+            } else if (itemId == R.id.nav_reports) {
+                fragment = new ReportsFragment();
+            } else if (itemId == R.id.nav_settings) {
+                fragment = new SettingsFragment();
+            }
+            
+            if (fragment != null) {
+                loadFragment(fragment);
+                return true;
+            }
+            return false;
         });
 
-        // Generate QR for pairing
-        binding.btnGenerateQR.setOnClickListener(v -> generatePairingQR());
+        // Set home as selected
+        binding.bottomNavigation.setSelectedItemId(R.id.nav_home);
     }
 
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .commit();
+    }
+
+    /**
+     * Check biometric authentication
+     * Only called when app is resumed from background
+     */
     private void checkBiometricAndAuthenticate() {
+        // Don't check if already checked or if app wasn't in background
+        if (!isAppInBackground || hasCheckedBiometricOnStart) {
+            return;
+        }
+        
+        hasCheckedBiometricOnStart = true;
+        
         BiometricHelper.BiometricStatus status = biometricHelper.getBiometricStatus();
         switch (status) {
             case AVAILABLE:
-                // Show biometric prompt
                 biometricHelper.showBiometricPrompt(
                         this,
                         "Unlock Guardian AI",
@@ -60,128 +95,74 @@ public class ParentDashboardActivity extends AppCompatActivity {
                         new BiometricHelper.BiometricCallback() {
                             @Override
                             public void onSuccess() {
-                                runOnUiThread(() -> Toast.makeText(ParentDashboardActivity.this,
-                                        "Authentication successful",
-                                        Toast.LENGTH_SHORT).show());
+                                runOnUiThread(() -> {
+                                    // Authentication successful, allow access
+                                    isAppInBackground = false;
+                                });
                             }
 
                             @Override
                             public void onError(String error) {
-                                runOnUiThread(() -> Toast.makeText(ParentDashboardActivity.this,
-                                        error,
-                                        Toast.LENGTH_LONG).show());
+                                runOnUiThread(() -> {
+                                    Toast.makeText(ParentDashboardActivity.this,
+                                            error,
+                                            Toast.LENGTH_LONG).show();
+                                });
                             }
                         }
                 );
                 break;
             case NOT_ENROLLED:
-                Toast.makeText(this,
-                        "No biometric enrolled. Please set up fingerprint or face unlock in device settings.",
-                        Toast.LENGTH_LONG).show();
+                // No biometric enrolled, allow access anyway
+                isAppInBackground = false;
                 break;
             default:
-                // Biometric not available, allow access anyway for FYP
-                Toast.makeText(this,
-                        "Biometric authentication not available on this device",
-                        Toast.LENGTH_SHORT).show();
+                // Biometric not available, allow access anyway
+                isAppInBackground = false;
                 break;
         }
     }
 
-    private void generatePairingQR() {
-        var user = authService.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
-            return;
+    /**
+     * Called when the user explicitly leaves the activity
+     * (e.g., pressing home button, switching to another app)
+     * This is NOT called when navigating within the app or showing dialogs
+     */
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        // User is leaving the app, mark as in background
+        isAppInBackground = true;
+        hasCheckedBiometricOnStart = false;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Only check biometric if app was in background (user left the app)
+        if (isAppInBackground) {
+            checkBiometricAndAuthenticate();
         }
+    }
 
-        binding.progressBar.setVisibility(android.view.View.VISIBLE);
-        binding.btnGenerateQR.setEnabled(false);
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Don't set isAppInBackground here - only onUserLeaveHint() should do that
+        // onStop() is called even when navigating within the app
+    }
 
-        QRPairingService qrPairingService = new QRPairingService();
-        qrPairingService.generatePairingQR(
-                user.getUid(),
-                user.getEmail() != null ? user.getEmail() : "",
-                new QRPairingService.QRPairingCallback() {
-                    @Override
-                    public void onSuccess(com.mustafa.guardianai.data.model.QRPairingData qrData) {
-                        runOnUiThread(() -> {
-                            binding.progressBar.setVisibility(android.view.View.GONE);
-                            binding.btnGenerateQR.setEnabled(true);
-                            
-                            try {
-                                // Generate QR code bitmap
-                                String qrJson = qrData.toJson();
-                                Log.d("ParentDashboard", "QR Data JSON: " + qrJson);
-                                
-                                android.graphics.Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrJson, 400, 400);
-                                
-                                if (qrBitmap != null) {
-                                    Log.d("ParentDashboard", "QR Bitmap generated successfully");
-                                    // Display QR code image
-                                    binding.ivQRCode.setImageBitmap(qrBitmap);
-                                    binding.ivQRCode.setVisibility(android.view.View.VISIBLE);
-                                    binding.tvQRCodeText.setVisibility(android.view.View.GONE);
-                                    
-                                    Toast.makeText(ParentDashboardActivity.this,
-                                            "QR code generated. Show this to child device to scan.",
-                                            Toast.LENGTH_LONG).show();
-                                } else {
-                                    Log.e("ParentDashboard", "QR Bitmap generation returned null");
-                                    // Fallback: show JSON text if bitmap generation fails
-                                    binding.ivQRCode.setVisibility(android.view.View.GONE);
-                                    binding.tvQRCodeText.setText("QR Code Data:\n" + qrJson);
-                                    binding.tvQRCodeText.setVisibility(android.view.View.VISIBLE);
-                                    
-                                    Toast.makeText(ParentDashboardActivity.this,
-                                            "QR code generated (text mode). Show this to child device.",
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            } catch (Exception e) {
-                                Log.e("ParentDashboard", "Error generating QR code: " + e.getMessage(), e);
-                                binding.progressBar.setVisibility(android.view.View.GONE);
-                                binding.btnGenerateQR.setEnabled(true);
-                                Toast.makeText(ParentDashboardActivity.this,
-                                        "Error generating QR code: " + e.getMessage(),
-                                        Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Exception exception) {
-                        Log.e("ParentDashboard", "Failed to generate QR pairing token: " + exception.getMessage(), exception);
-                        runOnUiThread(() -> {
-                            binding.progressBar.setVisibility(android.view.View.GONE);
-                            binding.btnGenerateQR.setEnabled(true);
-                            
-                            String errorMsg = exception.getMessage();
-                            if (errorMsg != null && errorMsg.contains("PERMISSION_DENIED")) {
-                                Toast.makeText(ParentDashboardActivity.this,
-                                        "Firestore permission denied. Please check Firestore security rules.",
-                                        Toast.LENGTH_LONG).show();
-                            } else if (errorMsg != null && errorMsg.contains("UNAVAILABLE")) {
-                                Toast.makeText(ParentDashboardActivity.this,
-                                        "Firestore is not available. Please check your internet connection and Firebase setup.",
-                                        Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(ParentDashboardActivity.this,
-                                        "Failed to generate QR: " + (errorMsg != null ? errorMsg : "Unknown error"),
-                                        Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                }
-        );
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Don't set isAppInBackground here - only onUserLeaveHint() should do that
+        // onPause() is called even when navigating within the app or showing dialogs
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Re-authenticate with biometric when returning to app
-        if (biometricHelper.isBiometricAvailable()) {
-            checkBiometricAndAuthenticate();
-        }
+        // Reset the check flag when resuming (in case user dismissed biometric)
+        // But don't check biometric here - only check in onStart()
     }
 }
-

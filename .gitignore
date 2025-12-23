@@ -86,3 +86,9 @@ lint/tmp/
 
 # Google services
 app/google-services.json
+
+# Firebase setup documentation (contains project-specific info)
+FIREBASE_SETUP.md
+FIREBASE_SETUP_CHECKLIST.md
+ANONYMOUS_AUTH_FIX.md
+FIRESTORE_SECURITY_RULES.md
