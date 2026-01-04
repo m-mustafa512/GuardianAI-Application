@@ -347,4 +347,20 @@ public class ChildProfileService {
         }
     }
 }
-
+/**
+ * ChildProfileService is a backend service class that manages child profiles stored in a Firebase Firestore database.
+ *
+ * The class provides the following functionality:
+ *
+ * - Creating a new child profile for a parent/child device pair, associating names, device type, and additional info.
+ * - Fetching a child profile either by its unique profile ID or by the child’s Firebase UID.
+ * - Retrieving all child profiles associated with a particular parent (by parent UID).
+ * - Updating existing child profiles.
+ * - Deleting a child profile, and on deletion, also removing any device-pair documents associated with that child.
+ * 
+ * It uses callback interfaces (ChildProfileCallback, ChildProfileListCallback, and SimpleCallback) to notify callers of asynchronous success or failure results for database operations.
+ *
+ * Parsing between Firestore DocumentSnapshot objects and ChildProfile instances is handled by a helper method within the class.
+ *
+ * This code also includes error handling and logging for debugging database operations.
+ */

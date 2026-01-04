@@ -17,6 +17,7 @@ import java.util.List;
 /**
  * ViewModel for Parent Dashboard
  * Manages dashboard data and business logic
+ * Uses AndroidViewModel for Application context access
  */
 public class ParentDashboardViewModel extends AndroidViewModel {
     private static final String TAG = "ParentDashboardViewModel";
@@ -84,6 +85,7 @@ public class ParentDashboardViewModel extends AndroidViewModel {
             @Override
             public void onFailure(Exception exception) {
                 Log.e(TAG, "Failed to load dashboard summary: " + exception.getMessage(), exception);
+                handleError(exception);
                 errorMessage.postValue("Failed to load dashboard: " + exception.getMessage());
                 isLoading.postValue(false);
             }
@@ -103,6 +105,7 @@ public class ParentDashboardViewModel extends AndroidViewModel {
             @Override
             public void onFailure(Exception exception) {
                 Log.e(TAG, "Failed to load child profiles: " + exception.getMessage(), exception);
+                handleError(exception);
                 errorMessage.postValue("Failed to load child profiles: " + exception.getMessage());
             }
         });
@@ -164,6 +167,13 @@ public class ParentDashboardViewModel extends AndroidViewModel {
     }
 
     /**
+     * Handle errors - consistent error handling
+     */
+    private void handleError(Exception error) {
+        Log.e(TAG, "Error in ViewModel: " + error.getMessage(), error);
+    }
+
+    /**
      * Clean up listeners when ViewModel is cleared
      */
     @Override
@@ -194,4 +204,5 @@ public class ParentDashboardViewModel extends AndroidViewModel {
         return errorMessage;
     }
 }
+
 

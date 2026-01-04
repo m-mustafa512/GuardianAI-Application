@@ -62,3 +62,11 @@ If you still get errors after enabling Anonymous Authentication:
 - **Authentication Settings:** https://console.firebase.google.com/project/guardian-ai-edfa6/authentication/providers
 - **Firestore Rules:** https://console.firebase.google.com/project/guardian-ai-edfa6/firestore/rules
 
+
+
+
+
+
+
+
+

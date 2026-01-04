@@ -82,3 +82,11 @@ After updating the rules:
 https://console.firebase.google.com/project/guardian-ai-edfa6/firestore/rules
 
 
+
+
+
+
+
+
+
+

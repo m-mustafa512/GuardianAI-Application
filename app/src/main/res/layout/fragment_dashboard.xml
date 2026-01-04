@@ -4,43 +4,106 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:fillViewport="true">
+    android:scrollbars="vertical"
+    android:fillViewport="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="20dp">
 
-        <!-- Header Section -->
+        <!-- Header Section with Profile Picture and App Name -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="20dp">
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp">
 
-            <ImageView
-                android:id="@+id/ivProfilePicture"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@android:drawable/ic_menu_gallery"
-                android:background="@drawable/circle_background"
-                android:scaleType="centerCrop"
-                android:layout_marginEnd="12dp" />
+            <!-- Profile Picture with Green Dot -->
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp">
 
-            <LinearLayout
+                <ImageView
+                    android:id="@+id/ivProfilePicture"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    android:background="@drawable/circle_background"
+                    android:scaleType="centerCrop" />
+
+                <!-- Green Online Dot -->
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#4CAF50" />
+            </RelativeLayout>
+
+            <!-- App Name -->
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:text="GuardianAI"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
+
+            <!-- Notification Bell with Red Dot -->
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/ivNotifications"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_dialog_info"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:contentDescription="Notifications" />
+
+                <!-- Red Notification Dot -->
+                <View
+                    android:id="@+id/vNotificationDot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#F44336"
+                    android:visibility="visible" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!-- Greeting Section - Positioned after header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:id="@+id/tvGreeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Good Morning,"
-                    android:textSize="24sp"
+                    android:text="Good Morning, "
+                    android:textSize="26sp"
                     android:textStyle="bold"
                     android:textColor="#000000" />
 
@@ -49,28 +112,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Sarah"
-                    android:textSize="24sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
-                    android:textColor="#2196F3" />
+                    android:textColor="#4A90E2" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivNotifications"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@android:drawable/ic_dialog_info"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="4dp"
-                android:contentDescription="Notifications" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Here's what's happening today."
+                android:textSize="15sp"
+                android:textColor="#666666"
+                android:layout_marginTop="6dp" />
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Here's what's happening today"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginBottom="20dp" />
 
         <!-- Summary Cards -->
         <LinearLayout
@@ -82,12 +136,13 @@
             <!-- Devices Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="130dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#E3F2FD">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#E3F2FD"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -100,7 +155,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@android:drawable/ic_menu_view"
-                        android:tint="#2196F3"
+                        android:tint="#4A90E2"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -126,55 +181,73 @@
             <!-- Alerts Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="130dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFEBEE">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFEBEE"
+                app:strokeWidth="0dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
+                    android:layout_height="match_parent">
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@android:drawable/ic_dialog_alert"
-                        android:tint="#F44336"
-                        android:layout_marginBottom="8dp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/tvTotalAlerts"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:textColor="#000000" />
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@android:drawable/ic_dialog_alert"
+                            android:tint="#F44336"
+                            android:layout_marginBottom="8dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ALERT"
-                        android:textSize="11sp"
-                        android:textColor="#666666"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/tvTotalAlerts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:textColor="#000000" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ALERT"
+                            android:textSize="11sp"
+                            android:textColor="#666666"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.1" />
+                    </LinearLayout>
+
+                    <!-- Red Dot Indicator -->
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/circle_background"
+                        android:backgroundTint="#F44336" />
+                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Total Screen Time Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="130dp"
                 android:layout_weight="1"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#F5F5F5">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#F5F5F5"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -234,7 +307,8 @@
                 android:layout_height="wrap_content"
                 android:text="Manage All"
                 android:textSize="14sp"
-                android:textColor="#2196F3"
+                android:textColor="#4A90E2"
+                android:textStyle="bold"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp" />
         </LinearLayout>
@@ -251,11 +325,11 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardAddDevice"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            app:cardCornerRadius="16dp"
+            android:layout_height="130dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
             app:strokeWidth="2dp"
-            app:strokeColor="#E0E0E0"
+            app:strokeColor="#4A90E2"
             app:cardBackgroundColor="#FFFFFF">
 
             <LinearLayout
@@ -266,21 +340,21 @@
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:src="@android:drawable/ic_input_add"
-                    android:tint="#2196F3"
-                    android:layout_marginBottom="8dp" />
+                    android:tint="#4A90E2"
+                    android:layout_marginBottom="12dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Add Another Device"
-                    android:textSize="14sp"
-                    android:textColor="#2196F3" />
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#4A90E2" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
-

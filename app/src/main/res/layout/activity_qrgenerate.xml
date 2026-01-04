@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="24dp">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_revert"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Back"
+                    android:tint="#000000" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Pair Child Device"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:gravity="center" />
+
+                <ImageButton
+                    android:id="@+id/btnClose"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Close"
+                    android:tint="#000000" />
+            </LinearLayout>
+
+            <!-- QR Code Container -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="32dp">
+
+                    <ImageView
+                        android:id="@+id/ivQRCode"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
+                        android:scaleType="fitCenter"
+                        android:visibility="gone"
+                        android:contentDescription="QR Code" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:indeterminateTint="#4A90E2"
+                        android:visibility="visible" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Instructions -->
+            <TextView
+                android:id="@+id/tvInstructions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1. Open the Guardian AI app on your child's device\n2. Tap 'Scan QR Code' on the login screen\n3. Point the camera at this QR code\n4. Wait for pairing to complete"
+                android:textSize="16sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="8dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
+
+            <!-- Expiry Time -->
+            <TextView
+                android:id="@+id/tvExpiryTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Valid for 10 minutes"
+                android:textSize="14sp"
+                android:textColor="#999999"
+                android:gravity="center"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Refresh Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Generate New QR Code"
+                android:textSize="16sp"
+                android:padding="16dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="#4A90E2"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+

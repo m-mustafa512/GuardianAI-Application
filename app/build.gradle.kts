@@ -44,11 +44,11 @@ dependencies {
     implementation(libs.constraintlayout)
     
     // Firebase BOM - manages all Firebase library versions
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-    implementation("com.google.firebase:firebase-analytics")
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
     
     // Lifecycle components (for ViewModel)
     implementation(libs.lifecycle.viewmodel)

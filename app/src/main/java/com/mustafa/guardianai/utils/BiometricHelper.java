@@ -17,6 +17,8 @@ public class BiometricHelper {
         this.context = context;
     }
 
+    private static final String PREF_BIOMETRIC_ENABLED = "biometric_enabled";
+
     /**
      * Check if biometric authentication is available
      */
@@ -24,6 +26,22 @@ public class BiometricHelper {
         BiometricManager biometricManager = BiometricManager.from(context);
         return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
                 == BiometricManager.BIOMETRIC_SUCCESS;
+    }
+
+    /**
+     * Check if biometric is enabled in settings
+     */
+    public static boolean isBiometricEnabled(Context context) {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("GuardianAI", Context.MODE_PRIVATE);
+        return prefs.getBoolean(PREF_BIOMETRIC_ENABLED, false);
+    }
+
+    /**
+     * Set biometric enabled state
+     */
+    public static void setBiometricEnabled(Context context, boolean enabled) {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("GuardianAI", Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(PREF_BIOMETRIC_ENABLED, enabled).apply();
     }
 
     /**

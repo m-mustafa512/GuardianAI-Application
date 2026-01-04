@@ -5,24 +5,22 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import com.mustafa.guardianai.R;
 import com.mustafa.guardianai.data.model.ChildProfile;
 import com.mustafa.guardianai.data.model.DashboardSummary;
 import com.mustafa.guardianai.databinding.FragmentDashboardBinding;
+import com.mustafa.guardianai.ui.base.BaseFragment;
 import java.util.List;
 
 /**
  * Dashboard Fragment
  * Main dashboard view with child profiles and summary
+ * Uses BaseFragment from Shared Foundation
  */
-public class DashboardFragment extends Fragment {
+public class DashboardFragment extends BaseFragment {
     private FragmentDashboardBinding binding;
     private ParentDashboardViewModel viewModel;
     private ChildProfileAdapter childProfileAdapter;
@@ -43,14 +41,15 @@ public class DashboardFragment extends Fragment {
                 new ViewModelProvider.AndroidViewModelFactory(requireActivity().getApplication()))
                 .get(ParentDashboardViewModel.class);
 
-        setupUI();
         setupObservers();
         
         // Initialize dashboard data
         viewModel.initialize();
     }
 
-    private void setupUI() {
+    @Override
+    protected void setupUI() {
+        if (!isFragmentAttached()) return;
         // Set parent name from Firebase Auth
         com.mustafa.guardianai.network.AuthService authService = new com.mustafa.guardianai.network.AuthService();
         var user = authService.getCurrentUser();
@@ -59,9 +58,15 @@ public class DashboardFragment extends Fragment {
         } else if (user != null && user.getEmail() != null) {
             // Extract name from email if display name not available
             String email = user.getEmail();
-            String name = email.substring(0, email.indexOf('@'));
-            binding.tvParentName.setText(name.substring(0, 1).toUpperCase() + name.substring(1));
+            int atIndex = email.indexOf('@');
+            if (atIndex > 0) {
+                String name = email.substring(0, atIndex);
+                binding.tvParentName.setText(name.substring(0, 1).toUpperCase() + name.substring(1));
+            }
         }
+        
+        // Load profile picture (if available)
+        loadProfilePicture();
 
         // Setup RecyclerView for child profiles
         childProfileAdapter = new ChildProfileAdapter(profile -> {
@@ -74,9 +79,9 @@ public class DashboardFragment extends Fragment {
         binding.rvChildProfiles.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvChildProfiles.setAdapter(childProfileAdapter);
 
-        // Add device button
+        // Add device button - launch QR code generation
         binding.cardAddDevice.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), ChildProfileListActivity.class);
+            Intent intent = new Intent(requireContext(), QRGenerateActivity.class);
             startActivity(intent);
         });
 
@@ -86,10 +91,34 @@ public class DashboardFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Notifications icon
+        // Notifications icon - navigate to alerts/notifications
         binding.ivNotifications.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Notifications feature coming soon", Toast.LENGTH_SHORT).show();
+            // Switch to Activity tab in bottom navigation
+            // This will be handled by the parent activity
+            if (getActivity() instanceof ParentDashboardActivity) {
+                ((ParentDashboardActivity) getActivity()).navigateToAlerts();
+            }
         });
+    }
+    
+    /**
+     * Load profile picture from SharedPreferences (same as SettingsFragment)
+     */
+    private void loadProfilePicture() {
+        try {
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("GuardianAI", android.content.Context.MODE_PRIVATE);
+            String base64Image = prefs.getString("parent_profile_picture", null);
+            
+            if (base64Image != null && !base64Image.isEmpty()) {
+                byte[] imageBytes = android.util.Base64.decode(base64Image, android.util.Base64.DEFAULT);
+                android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                if (bitmap != null) {
+                    binding.ivProfilePicture.setImageBitmap(bitmap);
+                }
+            }
+        } catch (Exception e) {
+            // If loading fails, use default image
+        }
     }
 
     private void setupObservers() {

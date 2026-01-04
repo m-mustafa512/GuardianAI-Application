@@ -95,12 +95,16 @@ public class ChildProfileListActivity extends AppCompatActivity {
     }
 
     private void showAddChildDialog() {
-        // For now, show a simple dialog
-        // In a real app, this would navigate to a form or QR pairing
+        // Show options: QR Pairing or Manual Entry
         new AlertDialog.Builder(this)
                 .setTitle("Add Child Profile")
-                .setMessage("To add a child profile:\n\n1. Generate a QR code from the dashboard\n2. Have the child scan it with their device\n\nOr create a profile manually (coming soon)")
-                .setPositiveButton("OK", null)
+                .setMessage("How would you like to add a child device?")
+                .setPositiveButton("QR Code Pairing", (dialog, which) -> {
+                    // Launch QR code generation activity
+                    Intent intent = new Intent(this, QRGenerateActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
@@ -122,4 +126,12 @@ public class ChildProfileListActivity extends AppCompatActivity {
         viewModel.loadChildProfiles();
     }
 }
+
+
+
+
+
+
+
+
 

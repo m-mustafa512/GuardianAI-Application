@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Primary Theme Colors (matching Login Module) -->
     <color name="primary">#4A90E2</color>
     <color name="primary_dark">#3A7BC8</color>
     <color name="accent">#4A90E2</color>
+    
+    <!-- Background Colors -->
+    <color name="background_light">#F5F5F5</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FF000000</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_hint">#999999</color>
+    
+    <!-- Status Colors -->
+    <color name="status_online">#4CAF50</color>
+    <color name="status_offline">#999999</color>
+    <color name="status_alert">#F44336</color>
+    <color name="status_warning">#FF9800</color>
+    
+    <!-- Card Colors -->
+    <color name="card_background">#FFFFFFFF</color>
+    <color name="card_elevation">#E0E0E0</color>
 </resources>
 

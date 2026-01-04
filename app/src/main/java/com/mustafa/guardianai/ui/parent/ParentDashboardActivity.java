@@ -47,9 +47,7 @@ public class ParentDashboardActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 fragment = new DashboardFragment();
             } else if (itemId == R.id.nav_activity) {
-                // Activity feature coming soon
-                Toast.makeText(this, "Activity feature coming soon", Toast.LENGTH_SHORT).show();
-                return false;
+                fragment = new AlertsFragment();
             } else if (itemId == R.id.nav_reports) {
                 fragment = new ReportsFragment();
             } else if (itemId == R.id.nav_settings) {
@@ -164,5 +162,13 @@ public class ParentDashboardActivity extends AppCompatActivity {
         super.onResume();
         // Reset the check flag when resuming (in case user dismissed biometric)
         // But don't check biometric here - only check in onStart()
+    }
+
+    /**
+     * Navigate to alerts/notifications tab
+     * Called from DashboardFragment when notification icon is clicked
+     */
+    public void navigateToAlerts() {
+        binding.bottomNavigation.setSelectedItemId(R.id.nav_activity);
     }
 }

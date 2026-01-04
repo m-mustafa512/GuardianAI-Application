@@ -2,6 +2,8 @@ package com.mustafa.guardianai.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+
 import android.os.Handler;
 import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +21,8 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e("PKG_CHECK", getPackageName());
+
         super.onCreate(savedInstanceState);
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

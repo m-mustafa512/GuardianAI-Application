@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Notifications"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/tvMarkAllRead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mark all read"
+                android:textSize="14sp"
+                android:textColor="#4A90E2"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- Filter Tabs -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#F5F5F5"
+            android:padding="4dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvFilterAll"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="All"
+                android:textSize="14sp"
+                android:textColor="#4A90E2"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="12dp"
+                android:background="@drawable/bg_filter_selected"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/tvFilterUnread"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Unread"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:gravity="center"
+                android:padding="12dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/tvFilterResolved"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Resolved"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:gravity="center"
+                android:padding="12dp"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="16dp" />
+
+        <!-- Alerts RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvAlerts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
+
+
+
+
+
+
+
+

@@ -249,6 +249,33 @@ public class DashboardService {
     }
 
     /**
+     * Get all alerts for a parent
+     * @param parentUid Parent's Firebase UID
+     * @param callback Callback for result
+     */
+    public void getAllAlerts(String parentUid, AlertsCallback callback) {
+        firestore.collection(COLLECTION_ALERTS)
+                .whereEqualTo("parentUid", parentUid)
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(50)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<Alert> alerts = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot document : querySnapshot) {
+                        Alert alert = documentToAlert(document);
+                        if (alert != null) {
+                            alerts.add(alert);
+                        }
+                    }
+                    callback.onSuccess(alerts);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to get alerts: " + e.getMessage(), e);
+                    callback.onFailure(e);
+                });
+    }
+
+    /**
      * Convert Firestore document to DashboardSummary
      */
     private DashboardSummary documentToDashboardSummary(DocumentSnapshot document) {
@@ -403,4 +430,5 @@ public class DashboardService {
         }
     }
 }
+
 

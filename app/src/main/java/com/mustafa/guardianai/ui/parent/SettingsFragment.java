@@ -6,11 +6,9 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +19,8 @@ import com.mustafa.guardianai.R;
 import com.mustafa.guardianai.databinding.FragmentSettingsBinding;
 import com.mustafa.guardianai.network.AuthService;
 import com.mustafa.guardianai.ui.auth.LoginActivity;
+import com.mustafa.guardianai.ui.base.BaseFragment;
+import com.mustafa.guardianai.utils.BiometricHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +29,9 @@ import java.io.InputStream;
  * Settings Fragment
  * Profile management with full backend functionality
  * Includes profile picture upload
+ * Uses BaseFragment from Shared Foundation
  */
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends BaseFragment {
     private FragmentSettingsBinding binding;
     private final AuthService authService = new AuthService();
     private static final String PROFILE_PICTURE_KEY = "parent_profile_picture";
@@ -64,20 +65,22 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setupUI();
         loadUserProfile();
         loadProfilePicture();
     }
 
-    private void setupUI() {
+    @Override
+    protected void setupUI() {
+        if (!isFragmentAttached()) return;
         // Change profile picture button
         binding.btnChangeProfilePicture.setOnClickListener(v -> showImageSourceDialog());
         
         // Profile picture click also opens image picker
         binding.ivProfilePicture.setOnClickListener(v -> showImageSourceDialog());
         
-        // Edit profile
-        binding.btnEditProfile.setOnClickListener(v -> showEditProfileDialog());
+        // Edit profile - make name/email clickable to edit
+        binding.tvUserName.setOnClickListener(v -> showEditProfileDialog());
+        binding.tvUserEmail.setOnClickListener(v -> showEditProfileDialog());
         
         // Manage children
         binding.btnManageChildren.setOnClickListener(v -> {
@@ -85,6 +88,38 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
         
+        // Change Password
+        binding.btnChangePassword.setOnClickListener(v -> {
+            showToast("Change password - coming soon");
+        });
+
+        // Biometric Login switch
+        binding.switchBiometric.setChecked(BiometricHelper.isBiometricEnabled(requireContext()));
+        binding.switchBiometric.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            BiometricHelper.setBiometricEnabled(requireContext(), isChecked);
+            showToast(isChecked ? "Biometric login enabled" : "Biometric login disabled");
+        });
+
+        // Dark Mode switch (placeholder)
+        binding.switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            showToast("Dark mode - coming soon");
+        });
+
+        // Notifications switch (placeholder)
+        binding.switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            showToast(isChecked ? "Notifications enabled" : "Notifications disabled");
+        });
+
+        // Help Center
+        binding.btnHelpCenter.setOnClickListener(v -> {
+            showToast("Help Center - coming soon");
+        });
+
+        // Privacy Policy
+        binding.btnPrivacyPolicy.setOnClickListener(v -> {
+            showToast("Privacy Policy - coming soon");
+        });
+
         // Logout
         binding.btnLogout.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
@@ -134,7 +169,7 @@ public class SettingsFragment extends Fragment {
             );
             cameraLauncher.launch(cameraImageUriHolder[0]);
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Failed to open camera: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            showError("Failed to open camera: " + e.getMessage());
         }
     }
 
@@ -156,10 +191,10 @@ public class SettingsFragment extends Fragment {
                 // Display the image
                 binding.ivProfilePicture.setImageBitmap(resizedBitmap);
                 
-                Toast.makeText(requireContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
+                showToast("Profile picture updated");
             }
         } catch (IOException e) {
-            Toast.makeText(requireContext(), "Failed to load image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            showError("Failed to load image: " + e.getMessage());
         }
     }
 
@@ -173,7 +208,7 @@ public class SettingsFragment extends Fragment {
             android.content.SharedPreferences prefs = requireContext().getSharedPreferences("GuardianAI", android.content.Context.MODE_PRIVATE);
             prefs.edit().putString(PROFILE_PICTURE_KEY, base64Image).apply();
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Failed to save picture: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            showError("Failed to save picture: " + e.getMessage());
         }
     }
 
@@ -202,7 +237,7 @@ public class SettingsFragment extends Fragment {
                     android.content.SharedPreferences prefs = requireContext().getSharedPreferences("GuardianAI", android.content.Context.MODE_PRIVATE);
                     prefs.edit().remove(PROFILE_PICTURE_KEY).apply();
                     binding.ivProfilePicture.setImageResource(android.R.drawable.ic_menu_gallery);
-                    Toast.makeText(requireContext(), "Profile picture removed", Toast.LENGTH_SHORT).show();
+                    showToast("Profile picture removed");
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -247,7 +282,7 @@ public class SettingsFragment extends Fragment {
                     if (!name.isEmpty()) {
                         updateUserProfile(name);
                     } else {
-                        Toast.makeText(requireContext(), "Name cannot be empty", Toast.LENGTH_SHORT).show();
+                        showToast("Name cannot be empty");
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -264,11 +299,11 @@ public class SettingsFragment extends Fragment {
             
             user.updateProfile(profileUpdates)
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                        showToast("Profile updated successfully");
                         loadUserProfile();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(), "Failed to update profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        showError("Failed to update profile: " + e.getMessage());
                     });
         }
     }

@@ -1,13 +1,9 @@
 package com.mustafa.guardianai.network;
 
-import android.content.Context;
-import android.provider.Settings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mustafa.guardianai.data.model.QRPairingData;
-import com.mustafa.guardianai.data.model.User;
-import com.mustafa.guardianai.data.model.UserRole;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +16,7 @@ import java.util.UUID;
 public class QRPairingService {
     private final FirebaseAuth auth;
     private final FirebaseFirestore firestore;
-    private static final long PAIRING_EXPIRY_TIME = 10 * 60 * 1000L; // 10 minutes
+    private static final long PAIRING_EXPIRY_TIME = 5 * 60 * 1000L; // 5 minutes
 
     public QRPairingService() {
         this.auth = FirebaseAuth.getInstance();
@@ -43,122 +39,105 @@ public class QRPairingService {
         );
 
         // Store pairing token in Firestore with expiration
+        Map<String, Object> tokenData = pairingData.toMap();
+        tokenData.put("createdAt", System.currentTimeMillis()); // Explicit createdAt field
+        
         firestore.collection("pairing_tokens")
                 .document(pairToken)
-                .set(pairingData)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(pairingData))
-                .addOnFailureListener(callback::onFailure);
+                .set(tokenData)
+                .addOnSuccessListener(aVoid -> {
+                    android.util.Log.d("QRPairingService", "Pairing token stored successfully: " + pairToken);
+                    callback.onSuccess(pairingData);
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("QRPairingService", "Failed to store pairing token: " + e.getMessage(), e);
+                    callback.onFailure(e);
+                });
     }
 
     /**
      * Validate and process QR pairing data from child device
-     * Automatically creates child account using anonymous authentication
+     * Assumes child is already authenticated anonymously
      * @param qrData QR pairing data scanned by child
      * @param callback Callback for result
      */
     public void processPairing(QRPairingData qrData, SimpleCallback callback) {
-        // Validate expiration
-        if (System.currentTimeMillis() > qrData.getExpiresAt()) {
-            callback.onFailure(new Exception("Pairing token has expired"));
+        android.util.Log.d("QRPairingService", "Starting pairing process - Token: " + qrData.getPairToken());
+        
+        // Get authenticated child user
+        FirebaseUser childUser = auth.getCurrentUser();
+        if (childUser == null || !childUser.isAnonymous()) {
+            android.util.Log.e("QRPairingService", "Child user not authenticated anonymously");
+            callback.onFailure(new Exception("Child device must be authenticated"));
             return;
         }
-
-        // Verify token exists in Firestore
+        
+        String childUid = childUser.getUid();
+        
+        // Read pairing token from Firestore
         firestore.collection("pairing_tokens")
                 .document(qrData.getPairToken())
                 .get()
                 .addOnSuccessListener(tokenDoc -> {
+                    // Fail if token does not exist
                     if (!tokenDoc.exists()) {
-                        callback.onFailure(new Exception("Invalid pairing token"));
+                        android.util.Log.e("QRPairingService", "Token does not exist: " + qrData.getPairToken());
+                        callback.onFailure(new Exception("Invalid pairing token. Please scan a fresh QR code."));
                         return;
                     }
-
-                    QRPairingData storedData = tokenDoc.toObject(QRPairingData.class);
-                    if (storedData == null) {
+                    
+                    // Check expiration
+                    Long expiresAt = tokenDoc.getLong("expiresAt");
+                    if (expiresAt == null || System.currentTimeMillis() > expiresAt) {
+                        android.util.Log.e("QRPairingService", "Token expired");
+                        callback.onFailure(new Exception("Pairing token has expired. Please generate a new QR code."));
+                        return;
+                    }
+                    
+                    // Get parent UID from Firestore - this is the single source of truth
+                    String storedParentUid = tokenDoc.getString("parentUid");
+                    if (storedParentUid == null) {
+                        android.util.Log.e("QRPairingService", "Invalid token data - missing parentUid");
                         callback.onFailure(new Exception("Invalid pairing data"));
                         return;
                     }
-
-                    // Verify parent UID matches
-                    if (!storedData.getParentUid().equals(qrData.getParentUid())) {
-                        callback.onFailure(new Exception("Pairing token mismatch"));
-                        return;
-                    }
-
-                    // Check if user is already logged in (sign out first if needed)
-                    FirebaseUser currentUser = auth.getCurrentUser();
-                    if (currentUser != null) {
-                        // Sign out any existing user (child should not have email/password login)
-                        auth.signOut();
-                    }
-
-                    // Create anonymous child account automatically
-                    auth.signInAnonymously()
-                            .addOnSuccessListener(authResult -> {
-                                FirebaseUser childUser = authResult.getUser();
-                                if (childUser == null) {
-                                    callback.onFailure(new Exception("Failed to create child account"));
-                                    return;
-                                }
-
-                                // Get device ID
-                                Context context = auth.getApp().getApplicationContext();
-                                String childDeviceId = Settings.Secure.getString(
-                                        context.getContentResolver(),
-                                        Settings.Secure.ANDROID_ID
-                                );
-                                // Make it effectively final for lambda
-                                final String finalChildDeviceId = (childDeviceId == null || childDeviceId.isEmpty()) 
-                                        ? UUID.randomUUID().toString() 
-                                        : childDeviceId;
-
-                                // Create child user document in Firestore
-                                User childUserData = new User(
-                                        childUser.getUid(),
-                                        "", // Child accounts don't have email
-                                        "Child Device", // Default display name
-                                        UserRole.CHILD,
-                                        qrData.getParentUid(),
-                                        finalChildDeviceId,
-                                        false // Child accounts don't need email verification
-                                );
-
-                                firestore.collection("users")
-                                        .document(childUser.getUid())
-                                        .set(childUserData)
-                                        .addOnSuccessListener(aVoid -> {
-                                            // Create device pair document
-                                            String pairId = UUID.randomUUID().toString();
-                                            Map<String, Object> pairData = new HashMap<>();
-                                            pairData.put("pairId", pairId);
-                                            pairData.put("parentUid", qrData.getParentUid());
-                                            pairData.put("childUid", childUser.getUid());
-                                            pairData.put("parentDeviceId", storedData.getParentUid());
-                                            pairData.put("childDeviceId", finalChildDeviceId);
-                                            pairData.put("pairedAt", System.currentTimeMillis());
-                                            pairData.put("isActive", true);
-
-                                            firestore.collection("device_pairs")
-                                                    .document(pairId)
-                                                    .set(pairData)
-                                                    .addOnSuccessListener(aVoid1 -> {
-                                                        // Delete used pairing token
-                                                        firestore.collection("pairing_tokens")
-                                                                .document(qrData.getPairToken())
-                                                                .delete()
-                                                                .addOnSuccessListener(aVoid2 -> 
-                                                                        callback.onSuccess())
-                                                                .addOnFailureListener(callback::onFailure);
-                                                    })
-                                                    .addOnFailureListener(callback::onFailure);
+                    
+                    // Create device_pairs document using parentUid from Firestore
+                    String pairId = UUID.randomUUID().toString();
+                    Map<String, Object> pairData = new HashMap<>();
+                    pairData.put("parentUid", storedParentUid);
+                    pairData.put("childUid", childUid);
+                    pairData.put("pairedAt", System.currentTimeMillis());
+                    
+                    firestore.collection("device_pairs")
+                            .document(pairId)
+                            .set(pairData)
+                            .addOnSuccessListener(aVoid -> {
+                                android.util.Log.d("QRPairingService", "Device pair created successfully");
+                                
+                                // Delete pairing token after successful pairing
+                                firestore.collection("pairing_tokens")
+                                        .document(qrData.getPairToken())
+                                        .delete()
+                                        .addOnSuccessListener(aVoid1 -> {
+                                            android.util.Log.d("QRPairingService", "Pairing completed successfully");
+                                            callback.onSuccess();
                                         })
-                                        .addOnFailureListener(callback::onFailure);
+                                        .addOnFailureListener(e -> {
+                                            android.util.Log.w("QRPairingService", "Failed to delete token: " + e.getMessage());
+                                            // Still call success since pairing worked
+                                            callback.onSuccess();
+                                        });
                             })
                             .addOnFailureListener(e -> {
-                                callback.onFailure(new Exception("Failed to create child account: " + e.getMessage()));
+                                android.util.Log.e("QRPairingService", "Failed to create device pair: " + e.getMessage(), e);
+                                callback.onFailure(new Exception("Failed to create device pair: " + e.getMessage()));
                             });
                 })
-                .addOnFailureListener(callback::onFailure);
+                .addOnFailureListener(e -> {
+                    android.util.Log.e("QRPairingService", "Failed to read pairing token: " + e.getMessage(), e);
+                    callback.onFailure(new Exception("Failed to verify pairing token: " + e.getMessage()));
+                });
     }
 
     /**
