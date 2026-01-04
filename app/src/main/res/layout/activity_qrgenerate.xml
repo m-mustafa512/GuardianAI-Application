@@ -70,11 +70,11 @@
                     android:padding="32dp">
 
                     <ImageView
-                        android:id="@+id/ivQRCode"
+                        android:id="@+id/imgQRCode"
                         android:layout_width="300dp"
                         android:layout_height="300dp"
-                        android:scaleType="fitCenter"
-                        android:visibility="gone"
+                        android:scaleType="centerInside"
+                        android:adjustViewBounds="false"
                         android:contentDescription="QR Code" />
 
                     <ProgressBar

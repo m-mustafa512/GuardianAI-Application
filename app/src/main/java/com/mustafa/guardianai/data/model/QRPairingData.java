@@ -2,12 +2,11 @@ package com.mustafa.guardianai.data.model;
 
 import org.json.JSONObject;
 import org.json.JSONException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * QR Code pairing data model
  * Contains information for secure device pairing
+ * Note: QR feature is not yet implemented - this is a placeholder
  */
 public class QRPairingData {
     private String parentUid;
@@ -30,65 +29,58 @@ public class QRPairingData {
     }
 
     /**
-     * Convert to Map for Firestore storage
-     */
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("parentUid", parentUid != null ? parentUid : "");
-        map.put("parentEmail", parentEmail != null ? parentEmail : "");
-        map.put("pairToken", pairToken != null ? pairToken : "");
-        map.put("expiresAt", expiresAt);
-        map.put("timestamp", timestamp);
-        return map;
-    }
-
-    /**
      * Convert to JSON string for QR code encoding
      * Uses Android's built-in JSONObject (no external dependency)
-     * QR code contains ONLY pairToken - parentUid is trusted from Firestore
      */
+//    public String toJson() {
+//        try {
+//            JSONObject json = new JSONObject();
+//            json.put("parentUid", parentUid != null ? parentUid : "");
+//            json.put("parentEmail", parentEmail != null ? parentEmail : "");
+//            json.put("pairToken", pairToken != null ? pairToken : "");
+//            json.put("expiresAt", expiresAt);
+//            json.put("timestamp", timestamp);
+//            return json.toString();
+//        } catch (JSONException e) {
+//            return "{}";
+//        }
+//    }
     public String toJson() {
-        try {
-            JSONObject json = new JSONObject();
-            json.put("pairToken", pairToken != null ? pairToken : "");
-            return json.toString();
-        } catch (JSONException e) {
-            return "{}";
-        }
+        // Encode ONLY the pairing token to keep QR small and decodable
+        return "PAIR:" + (pairToken != null ? pairToken : "");
     }
+
 
     /**
      * Parse JSON string from QR code
      * Uses Android's built-in JSONObject (no external dependency)
-     * QR code contains ONLY pairToken - parentUid is read from Firestore
      */
-    public static QRPairingData fromJson(String json) {
-        try {
-            if (json == null || json.trim().isEmpty()) {
-                android.util.Log.e("QRPairingData", "JSON string is null or empty");
-                return null;
-            }
-            
-            JSONObject jsonObject = new JSONObject(json);
+//    public static QRPairingData fromJson(String json) {
+//        try {
+//            JSONObject jsonObject = new JSONObject(json);
+//            QRPairingData data = new QRPairingData();
+//            data.setParentUid(jsonObject.optString("parentUid", ""));
+//            data.setParentEmail(jsonObject.optString("parentEmail", ""));
+//            data.setPairToken(jsonObject.optString("pairToken", ""));
+//            data.setExpiresAt(jsonObject.optLong("expiresAt", 0));
+//            data.setTimestamp(jsonObject.optLong("timestamp", System.currentTimeMillis()));
+//            return data;
+//        } catch (JSONException e) {
+//            return null;
+//        }
+//    }
+    public static QRPairingData fromJson(String qrText) {
+        if (qrText == null) return null;
+
+        if (qrText.startsWith("PAIR:")) {
             QRPairingData data = new QRPairingData();
-            
-            String pairToken = jsonObject.optString("pairToken", "");
-            
-            // Validate required field - only pairToken is required
-            if (pairToken.isEmpty()) {
-                android.util.Log.e("QRPairingData", "Missing required field - pairToken: " + pairToken);
-                return null;
-            }
-            
-            data.setPairToken(pairToken);
-            
-            android.util.Log.d("QRPairingData", "Successfully parsed QR data - Token: " + pairToken);
+            data.setPairToken(qrText.substring(5));
             return data;
-        } catch (JSONException e) {
-            android.util.Log.e("QRPairingData", "JSON parsing error: " + e.getMessage(), e);
-            return null;
         }
+
+        return null;
     }
+
 
     // Getters and Setters
     public String getParentUid() {

@@ -1,7 +1,9 @@
 package com.mustafa.guardianai.ui.parent;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,7 +56,7 @@ public class QRGenerateActivity extends AppCompatActivity {
 
         // Show loading
         binding.progressBar.setVisibility(View.VISIBLE);
-        binding.ivQRCode.setVisibility(View.GONE);
+        binding.imgQRCode.setVisibility(View.GONE);
         binding.tvInstructions.setVisibility(View.GONE);
 
         // Generate QR pairing data
@@ -66,25 +68,55 @@ public class QRGenerateActivity extends AppCompatActivity {
                     
                     // Convert pairing data to JSON string
                     String qrDataJson = pairingData.toJson();
-                    android.util.Log.d("QRGenerateActivity", "Generated QR JSON: " + qrDataJson);
                     
                     // Generate QR code bitmap
-                    int qrSize = (int) (getResources().getDisplayMetrics().density * 300); // 300dp
-                    android.graphics.Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrDataJson, qrSize, qrSize);
-                    
-                    if (qrBitmap != null) {
-                        binding.ivQRCode.setImageBitmap(qrBitmap);
-                        binding.ivQRCode.setVisibility(View.VISIBLE);
-                        binding.tvInstructions.setVisibility(View.VISIBLE);
-                        
-                        // Calculate expiry time remaining
-                        long timeRemaining = (pairingData.getExpiresAt() - System.currentTimeMillis()) / 1000 / 60; // minutes
-                        binding.tvExpiryTime.setText("Valid for " + timeRemaining + " minutes");
-                    } else {
-                        Toast.makeText(QRGenerateActivity.this, 
-                                "Failed to generate QR code", 
-                                Toast.LENGTH_LONG).show();
-                    }
+
+
+                   // int qrSizePx = 900; // fixed large size for reliable scanning
+                    //android.graphics.Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrPayload, qrSizePx, qrSizePx);
+
+                    //ImageView imgQrCode = findViewById(R.id.imgQrCode);
+                    ImageView imgQrCode = binding.imgQRCode;
+
+                    imgQrCode.post(() -> {
+
+                        int width = imgQrCode.getWidth();
+                        int height = imgQrCode.getHeight();
+
+                        // ✅ Fallback for real devices
+                        if (width <= 0 || height <= 0) {
+                            int fallbackDp = 260; // safe QR size
+                            float density = getResources().getDisplayMetrics().density;
+                            width = height = (int) (fallbackDp * density);
+                        }
+                        String qrPayload = "PAIR:" + pairingData.getPairToken();
+
+
+                        Bitmap qrBitmap = QRCodeGenerator.generateQRCode(
+                                qrPayload,
+                                width,
+                                height
+                        );
+
+                        imgQrCode.setImageBitmap(qrBitmap);
+
+                        if (qrBitmap != null) {
+                            binding.imgQRCode.setImageBitmap(qrBitmap);
+                            binding.imgQRCode.setVisibility(View.VISIBLE);
+                            binding.tvInstructions.setVisibility(View.VISIBLE);
+
+                            // Calculate expiry time remaining
+                            long timeRemaining = (pairingData.getExpiresAt() - System.currentTimeMillis()) / 1000 / 60; // minutes
+                            binding.tvExpiryTime.setText("Valid for " + timeRemaining + " minutes");
+                        } else {
+                            Toast.makeText(QRGenerateActivity.this,
+                                    "Failed to generate QR code",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+
+
                 });
             }
 
